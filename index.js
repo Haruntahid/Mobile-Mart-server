@@ -36,11 +36,45 @@ async function run() {
 
     // get all mobiles
     app.get("/mobiles", async (req, res) => {
-      const result = await mobileCollection.find().toArray();
-      res.send(result);
+      const page = parseInt(req.query.page) || 0;
+      const size = parseInt(req.query.size) || 6;
+      const search = req.query.search || "";
+      const sort = req.query.sort || "";
+
+      console.log(sort);
+
+      let query = {};
+      if (search) {
+        query.name = { $regex: search, $options: "i" };
+      }
+
+      // Sorting options based on the sort parameter
+      let sortOption = {};
+      if (sort === "price-asc") {
+        sortOption = { price: 1 }; // Sort by price low to high
+      } else if (sort === "price-desc") {
+        sortOption = { price: -1 }; // Sort by price high to low
+      } else if (sort === "date-asc") {
+        sortOption = { dateAdded: 1 }; // Sort by oldest first
+      } else if (sort === "date-desc") {
+        sortOption = { dateAdded: -1 }; // Sort by newest first
+      }
+
+      const totalMobiles = await mobileCollection.countDocuments(query); // Corrected total count based on search
+      const mobiles = await mobileCollection
+        .find(query)
+        .sort(sortOption)
+        .skip(page * size) // Adjusted for zero-based page
+        .limit(size)
+        .toArray();
+
+      res.send({
+        mobile: mobiles,
+        totalCount: totalMobiles,
+      });
     });
     // Send a ping to confirm a successful connection
-    await client.db("admin").command({ ping: 1 });
+    // await client.db("admin").command({ ping: 1 });
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
     );
