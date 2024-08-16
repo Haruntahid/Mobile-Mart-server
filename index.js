@@ -40,13 +40,10 @@ async function run() {
       const size = parseInt(req.query.size) || 6;
       const search = req.query.search || "";
       const sort = req.query.sort || "";
-
-      console.log(sort);
-
-      let query = {};
-      if (search) {
-        query.name = { $regex: search, $options: "i" };
-      }
+      const brands = req.query.brands || "";
+      const categories = req.query.categories || "";
+      const minPrice = parseFloat(req.query.minPrice) || 0;
+      const maxPrice = parseFloat(req.query.maxPrice) || Number.MAX_VALUE;
 
       // Sorting options based on the sort parameter
       let sortOption = {};
@@ -59,6 +56,27 @@ async function run() {
       } else if (sort === "date-desc") {
         sortOption = { dateAdded: -1 }; // Sort by newest first
       }
+
+      // Filtering by search
+      const searchQuery = search
+        ? { name: { $regex: search, $options: "i" } }
+        : {};
+
+      // Filtering by brands (if brands are provided)
+      const brandQuery = brands ? { brand: { $in: brands.split(",") } } : {};
+
+      const categoryQuery = categories
+        ? { category: { $in: categories.split(",") } }
+        : {};
+      const priceQuery = { price: { $gte: minPrice, $lte: maxPrice } };
+
+      // Combine all queries
+      const query = {
+        ...searchQuery,
+        ...brandQuery,
+        ...categoryQuery,
+        ...priceQuery,
+      };
 
       const totalMobiles = await mobileCollection.countDocuments(query); // Corrected total count based on search
       const mobiles = await mobileCollection
@@ -73,6 +91,22 @@ async function run() {
         totalCount: totalMobiles,
       });
     });
+
+    // get all brands
+    app.get("/brands", async (req, res) => {
+      // Fetch all documents from the collection
+      const allMobiles = await mobileCollection.find({}).toArray();
+
+      // Extract all brands
+      const allBrands = allMobiles.map((mobile) => mobile.brand);
+
+      // Filter unique brands using a Set
+      const uniqueBrands = [...new Set(allBrands)];
+
+      // Send the unique brands as a response
+      res.send({ brands: uniqueBrands });
+    });
+
     // Send a ping to confirm a successful connection
     // await client.db("admin").command({ ping: 1 });
     console.log(
