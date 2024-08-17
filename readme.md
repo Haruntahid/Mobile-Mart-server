@@ -1,4 +1,4 @@
-# Mobile Mart Server
+# Mobile Mart Server 📱
 
 This is the backend server for the Mobile Mart application. It serves as the API to handle mobile phone data, including filtering, sorting, and pagination. The server is built using Node.js, Express.js, and MongoDB.
 

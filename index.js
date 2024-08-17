@@ -38,7 +38,7 @@ async function run() {
     // get all mobiles
     app.get("/mobiles", async (req, res) => {
       const page = parseInt(req.query.page) || 0;
-      const size = parseInt(req.query.size) || 6;
+      const size = parseInt(req.query.size) || 9;
       const search = req.query.search || "";
       const sort = req.query.sort || "";
       const brands = req.query.brands || "";
