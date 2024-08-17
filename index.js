@@ -5,14 +5,15 @@ const port = process.env.PORT || 5000;
 require("dotenv").config();
 const { MongoClient, ServerApiVersion } = require("mongodb");
 
-// tahidtaha997
-// T5pULcAbOdogev8J
-
 // middleware
 app.use(express.json());
 app.use(
   cors({
-    origin: ["http://localhost:5173", "http://localhost:5174"],
+    origin: [
+      "http://localhost:5173",
+      "http://localhost:5174",
+      "https://mobile-mart-d9ffe.web.app",
+    ],
   })
 );
 
@@ -48,13 +49,13 @@ async function run() {
       // Sorting options based on the sort parameter
       let sortOption = {};
       if (sort === "price-asc") {
-        sortOption = { price: 1 }; // Sort by price low to high
+        sortOption = { price: 1 };
       } else if (sort === "price-desc") {
-        sortOption = { price: -1 }; // Sort by price high to low
+        sortOption = { price: -1 };
       } else if (sort === "date-asc") {
-        sortOption = { dateAdded: 1 }; // Sort by oldest first
+        sortOption = { dateAdded: 1 };
       } else if (sort === "date-desc") {
-        sortOption = { dateAdded: -1 }; // Sort by newest first
+        sortOption = { dateAdded: -1 };
       }
 
       // Filtering by search
@@ -99,12 +100,14 @@ async function run() {
 
       // Extract all brands
       const allBrands = allMobiles.map((mobile) => mobile.brand);
+      const allCategories = allMobiles.map((mobile) => mobile.category);
 
       // Filter unique brands using a Set
       const uniqueBrands = [...new Set(allBrands)];
+      const uniqueCategory = [...new Set(allCategories)];
 
       // Send the unique brands as a response
-      res.send({ brands: uniqueBrands });
+      res.send({ brands: uniqueBrands, category: uniqueCategory });
     });
 
     // Send a ping to confirm a successful connection
